@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Loader } from '.';
-import * as WinesService from '../services/Wines';
+
+import { connect } from 'react-redux';
+import * as Actions from '../actions';
 
 export class WineList extends Component {
   onSelectWine = (e, wineId) => {
@@ -34,45 +36,42 @@ export class WineList extends Component {
   }
 }
 
-export class WineListPage extends Component {
+class _WineListPage extends Component {
   static contextTypes = {
     router: PropTypes.object,
   };
 
-  state = {
-    loading: false,
-    wines: [],
-  };
-
   componentDidMount() {
-    const region = this.props.params.regionId;
-    this.setState({ loading: true }, () => {
-      WinesService.fetchWinesFrom(region).then(wines => {
-        this.setState({
-          loading: false,
-          wines,
-        });
-      });
-    });
+    const region = this.props.match.params.regionId;
+    this.props.dispatch(Actions.fetchWinesFrom(region));
   }
 
   onSelectWine = id => {
-    const root =
-      window.location.hostname === 'react-bootcamp.github.io' ? '/react-wines-102/' : '/';
-    const region = this.props.params.regionId;
-    this.context.router.push({
-      pathname: `${root}regions/${region}/wines/${id}`,
-    });
+    this.props.history.push({
+      pathname: `${this.props.match.params.regionId}/wines/${id}`
+    })
+    // this.context.router.push({
+    //   pathname: `regions/${region}/wines/${id}`,
+    // })
   };
 
   render() {
-    if (this.state.loading) {
+    if (this.props.loading) {
       return (
         <div className="center-align">
           <Loader />
         </div>
       );
     }
-    return <WineList onSelectWine={this.onSelectWine} wines={this.state.wines} wine={{}} />;
+    return <WineList onSelectWine={this.onSelectWine} wines={this.props.wines} wine={{}} />;
   }
 }
+
+function mapFromStoerToProps(store) {
+  return {
+    wines: store.wines,
+    loading: store.loading === 'HTTP_LOADING',
+  };
+}
+
+export const WineListPage = connect(mapFromStoerToProps)(_WineListPage);

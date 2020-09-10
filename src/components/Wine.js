@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Loader } from '.';
-import * as WinesService from '../services/Wines';
-import { LikeButton, CommentButton, CommentList, CommentModal } from '.';
+// import { LikeButton, CommentButton, CommentList, CommentModal } from '.';
+
+import { connect } from 'react-redux';
+import * as Actions from '../actions';
 
 export class Wine extends Component {
   render() {
@@ -17,7 +18,7 @@ export class Wine extends Component {
             <img
               className="responsive-img wine-detail-image"
               alt="Wine bottle pic"
-              src={`${this.props.host}/api/wines/${this.props.wine.id}/image`}
+              src={`https://wines-api.herokuapp.com/api/wines/${this.props.wine.id}/image`}
             />
           </div>
           <div className="card-stacked">
@@ -36,11 +37,11 @@ export class Wine extends Component {
               <p>
                 <b>Grapes:</b> {this.props.wine.grapes.join(', ')}
               </p>
-              <CommentList wine={this.props.wine} />
+              {/* <CommentList wine={this.props.wine} /> */}
             </div>
             <div className="card-action">
-              <LikeButton wine={this.props.wine} />
-              <CommentButton openCommentModal={this.props.openCommentModal} />
+              {/* <LikeButton wine={this.props.wine} /> */}
+              {/* <CommentButton openCommentModal={this.props.openCommentModal} /> */}
             </div>
           </div>
         </div>
@@ -49,39 +50,15 @@ export class Wine extends Component {
   }
 }
 
-export class WinePage extends Component {
-  static contextTypes = {
-    router: PropTypes.object,
-  };
-
-  state = {
-    loading: false,
-    selectedWine: null,
-    commentModalOpen: false,
-  };
+export class _WinePage extends Component {
 
   componentDidMount() {
-    const id = this.props.params.wineId;
-    this.setState({ loading: true }, () => {
-      WinesService.fetchWine(id).then(wine => {
-        this.setState({
-          loading: false,
-          selectedWine: wine,
-        });
-      });
-    });
+    const id = this.props.match.params.wineId;
+    this.props.dispatch(Actions.fetchCurrentWine(id));
   }
 
-  closeCommentModal = () => {
-    this.setState({ commentModalOpen: false });
-  };
-
-  openCommentModal = () => {
-    this.setState({ commentModalOpen: true });
-  };
-
   render() {
-    if (this.state.loading) {
+    if (this.props.loading) {
       return (
         <div className="center-align">
           <Loader />
@@ -91,16 +68,24 @@ export class WinePage extends Component {
     return (
       <div>
         <Wine
-          host={WinesService.host}
-          wine={this.state.selectedWine}
-          openCommentModal={this.openCommentModal}
+          wine={this.props.wine}
         />
-        <CommentModal
+        {/* <CommentModal
           wine={this.state.selectedWine}
           isOpen={this.state.commentModalOpen}
           closeCommentModal={this.closeCommentModal}
-        />
+        /> */}
       </div>
     );
   }
+
 }
+
+function mapFromStoreToProps(store) {
+  return {
+    wine: store.currentWine ? store.currentWine.wine : null,
+    loading: store.loading === 'HTTP_LOADING',
+  };
+}
+
+export const WinePage = connect(mapFromStoreToProps)(_WinePage);

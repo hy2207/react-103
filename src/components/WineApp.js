@@ -1,24 +1,20 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 
 export class WineApp extends Component {
-  static contextTypes = {
-    router: PropTypes.object,
-  };
 
-  goBack = e => {
-    e.preventDefault();
-    this.context.router.goBack();
-  };
+  // goBack = e => {
+  //   e.preventDefault();
+  //   this.context.router.goBack();
+  // };
 
-  goHome = e => {
-    e.preventDefault();
-    const root =
-      window.location.hostname === 'react-bootcamp.github.io' ? '/react-wines-103/' : '/';
-    this.context.router.push({
-      pathname: `${root}`,
-    });
-  };
+  // goHome = e => {
+  //   e.preventDefault();
+  //   const root =
+  //     window.location.hostname === 'react-bootcamp.github.io' ? '/react-wines-103/' : '/';
+  //   this.context.router.push({
+  //     pathname: `${root}`,
+  //   });
+  // };
 
   render() {
     const displayButton =

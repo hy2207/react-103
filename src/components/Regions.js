@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import * as WinesService from '../services/Wines';
 import { Loader } from '.';
+import { Link } from 'react-router-dom';
+
+import { connect } from 'react-redux';
+import * as Actions from '../actions';
 
 export class Regions extends Component {
   onSelectRegion = (e, region) => {
@@ -15,15 +17,17 @@ export class Regions extends Component {
         <h2 className="center-align">Regions</h2>
         <div className="collection">
           {this.props.regions.map(region => (
-            <a
-              key={region}
-              href="#!"
-              onClick={e => this.onSelectRegion(e, region)}
-              className={['collection-item', region === this.props.region ? 'active' : ''].join(
-                ' '
-              )}>
-              {region}
-            </a>
+            <Link to = {`/regions/${region}`}>
+              <a
+                key={region}
+                href="#!"
+                onClick={e => this.onSelectRegion(e, region)}
+                className={['collection-item', region === this.props.region ? 'active' : ''].join(
+                  ' '
+                )}>
+                {region}
+              </a>
+            </Link>
           ))}
         </div>
       </div>
@@ -31,37 +35,20 @@ export class Regions extends Component {
   }
 }
 
-export class RegionsPage extends Component {
-  static contextTypes = {
-    router: PropTypes.object,
-  };
-
-  state = {
-    loading: false,
-    regions: [],
-  };
+export class _RegionsPage extends Component {
 
   componentDidMount() {
-    this.setState({ loading: true }, () => {
-      WinesService.fetchRegions().then(regions => {
-        this.setState({
-          loading: false,
-          regions,
-        });
-      });
-    });
+    this.props.dispatch(Actions.fetchRegions());
   }
 
   onSelectRegion = region => {
-    const root =
-      window.location.hostname === 'react-bootcamp.github.io' ? '/react-wines-102/' : '/';
-    this.context.router.push({
-      pathname: `${root}regions/${region}`,
+    this.props.history.push({
+      pathname: `/regions/${region}`
     });
   };
 
   render() {
-    if (this.state.loading) {
+    if (this.props.loading === 'LOADED') {
       return (
         <div className="center-align">
           <Loader />
@@ -69,7 +56,17 @@ export class RegionsPage extends Component {
       );
     }
     return (
-      <Regions onSelectRegion={this.onSelectRegion} regions={this.state.regions} region={{}} />
+      <Regions onSelectRegion={this.onSelectRegion} regions={this.props.regions} />
     );
   }
 }
+//call when updating store
+//send store value in redux to props in react
+function mapFromStoreToProps(store) {
+  return {
+    regions: store.regions,
+    loading: store.loading === 'HTTP_LOADING',
+  }
+}
+
+export const RegionsPage = connect(mapFromStoreToProps)(_RegionsPage);
